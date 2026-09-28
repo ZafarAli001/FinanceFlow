@@ -4,15 +4,16 @@
   "description": "Production-grade personal finance management web application and PWA with AI voice assistant.",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma db push && next build",
+    "postinstall": "prisma generate",
+    "build": "prisma generate && prisma db push && next build",
     "start": "next start",
     "test": "vitest run"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
-    "bcryptjs": "^3.0.3 font",
+    "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
-    "idb": "^8.0.3 font",
+    "idb": "^8.0.3",
     "jose": "^6.1.1",
     "lucide-react": "^1.16.0",
     "next": "^15.2.0",
