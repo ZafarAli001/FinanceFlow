@@ -147,25 +147,24 @@ erDiagram
 
 You can host FinanceFlow for **free forever** using **Vercel** (for Next.js frontend/serverless APIs) and **Supabase** (for managed cloud PostgreSQL).
 
-### Step 1: Create a Free Supabase Database
-1. Go to [supabase.com](https://supabase.com) and create a free account.
-2. Click **New Project**, choose a name, and set a database password (save this password).
-3. Once provisioned, go to **Project Settings** -> **Database**.
-4. Scroll to **Connection string**:
-   - Select **URI** tab, set mode to **Transaction** (Port `6543`). Copy this URI (this is your `DATABASE_URL`).
-   - Switch mode to **Session** (Port `5432`). Copy this URI (this is your `DIRECT_URL`).
-   *(Remember to replace `[YOUR-PASSWORD]` in both URIs with your actual database password)*.
+### Step 1: Create Free Supabase Database & Initialize Schema
+1. Go to [supabase.com](https://supabase.com) and create a free project.
+2. Once created, click **SQL Editor** on the left menu $\rightarrow$ click **New Query**.
+3. Copy the contents of [`prisma/supabase-schema.sql`](prisma/supabase-schema.sql) and paste it into the SQL editor, then click **Run**.
+   *(All 6 tables, relations, and indexes are now ready in your cloud PostgreSQL!)*
+4. Go to **Project Settings** (gear icon) $\rightarrow$ **Database** $\rightarrow$ scroll to **Connection string**:
+   - Select **URI** tab, set mode to **Transaction** (Port `6543`).
+   - Copy the URI and replace `[YOUR-PASSWORD]` with your actual database password. This is your `DATABASE_URL`.
 
 ### Step 2: Deploy on Vercel
 1. Go to [vercel.com](https://vercel.com) and sign in with GitHub.
-2. Click **Add New...** -> **Project**.
+2. Click **Add New...** $\rightarrow$ **Project**.
 3. Import your repository: `https://github.com/ZafarAli001/FinanceFlow`.
 4. In the **Environment Variables** section, add:
    - `DATABASE_URL` = *(Your Supabase Transaction Pooler URI from Step 1)*
-   - `DIRECT_URL` = *(Your Supabase Session/Direct URI from Step 1)*
-   - `JWT_SECRET` = *(Any random 32+ character string, e.g. run `openssl rand -hex 32`)*
+   - `JWT_SECRET` = *(Any random 32+ character string, e.g. `financeflow-secret-key-prod-2026`)*
 5. Click **Deploy**.
-   Vercel will install dependencies, generate the Prisma client, automatically apply the database schema via `prisma db push`, and deploy your live app with HTTPS!
+   Vercel will install dependencies, generate the Prisma client, build the app, and deploy your live app with HTTPS!
 
 ---
 
