@@ -1,0 +1,136 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String
+  name         String
+  currency     String        @default("INR")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  accounts     Account[]
+  categories   Category[]
+  transactions Transaction[]
+  budgets      Budget[]
+  preference   UserPreference?
+
+  @@index([email])
+}
+
+model Account {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  type           String   @default("BANK") // BANK, CASH, WALLET, CREDIT_CARD, OTHER
+  openingBalance Float    @default(0)
+  currentBalance Float    @default(0)
+  currency       String   @default("INR")
+  icon           String?
+  color          String?
+  isDefault      Boolean  @default(false)
+  isArchived     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  transactions            Transaction[] @relation("AccountTransactions")
+  sourceTransactions      Transaction[] @relation("SourceAccountTransactions")
+  destinationTransactions Transaction[] @relation("DestinationAccountTransactions")
+
+  @@index([userId])
+  @@index([userId, isDefault])
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  type      String   @default("EXPENSE") // EXPENSE, INCOME
+  icon      String?
+  color     String?
+  isSystem  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions Transaction[]
+  budgets      Budget[]
+
+  @@index([userId])
+  @@index([userId, type])
+}
+
+model Transaction {
+  id                   String   @id @default(uuid())
+  clientId             String?
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type                 String   // EXPENSE, INCOME, TRANSFER
+  amount               Float
+  currency             String   @default("INR")
+
+  accountId            String
+  account              Account  @relation("AccountTransactions", fields: [accountId], references: [id], onDelete: Cascade)
+
+  sourceAccountId      String?
+  sourceAccount        Account? @relation("SourceAccountTransactions", fields: [sourceAccountId], references: [id], onDelete: SetNull)
+
+  destinationAccountId String?
+  destinationAccount  Account? @relation("DestinationAccountTransactions", fields: [destinationAccountId], references: [id], onDelete: SetNull)
+
+  categoryId           String?
+  category             Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  merchant             String?
+  description          String?
+  note                 String?
+  date                 DateTime @default(now())
+  time                 String?
+  tags                 String?
+  receiptUrl           String?
+  paymentMethod        String?
+  syncStatus           String   @default("SYNCED")
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, date])
+  @@index([userId, type])
+  @@index([accountId])
+  @@index([categoryId])
+}
+
+model Budget {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  period     String    // YYYY-MM format, e.g. "2026-09"
+  amount     Float
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([userId, period])
+}
+
+model UserPreference {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme            String   @default("system")
+  defaultAccountId String?
+  voiceEnabled     Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
