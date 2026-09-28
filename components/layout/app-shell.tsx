@@ -34,6 +34,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         fetch("/api/categories"),
       ]);
 
+      if (accRes.status === 401 || catRes.status === 401) {
+        if (!isAuthPage) {
+          window.location.href = "/login";
+        }
+        return;
+      }
+
       if (accRes.ok) {
         const data = await accRes.json();
         setAccounts(data.accounts || []);

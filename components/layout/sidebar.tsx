@@ -17,6 +17,7 @@ import {
   Plus,
   TrendingUp,
   TrendingDown,
+  LogOut,
 } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -132,6 +133,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenVoice, onOpenQuickAdd })
           </div>
           <Settings2 className="w-4 h-4 text-muted-foreground group-hover:text-foreground shrink-0" />
         </Link>
+
+        <button
+          onClick={async () => {
+            await fetch("/api/auth/logout", { method: "POST" });
+            window.location.href = "/login";
+          }}
+          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors group"
+        >
+          <LogOut className="w-4 h-4 shrink-0 transition-transform group-hover:-translate-x-0.5" />
+          <span>Sign Out</span>
+        </button>
       </div>
     </aside>
   );

@@ -169,20 +169,8 @@ export async function getCurrentUser(): Promise<TokenPayload | null> {
       if (payload) return payload;
     }
 
-    // Fallback to demo user if no cookie present for immediate usage
-    const demoUser = await getOrCreateDemoUser();
-    return {
-      userId: demoUser.id,
-      email: demoUser.email,
-      name: demoUser.name,
-    };
+    return null;
   } catch (error) {
-    // Return demo user if db fails or server context issue
-    const demoUser = await getOrCreateDemoUser();
-    return {
-      userId: demoUser.id,
-      email: demoUser.email,
-      name: demoUser.name,
-    };
+    return null;
   }
 }
