@@ -61,9 +61,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    fetchGlobalData();
-    registerAutoSync();
+    if (isAuthPage) return;
 
+    void fetchGlobalData();
+    const unregisterAutoSync = registerAutoSync();
+
+    return unregisterAutoSync;
+  }, [isAuthPage]);
+
+  useEffect(() => {
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/sw.js")

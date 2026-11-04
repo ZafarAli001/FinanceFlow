@@ -104,25 +104,27 @@ export async function pullCloudUpdates() {
   }
 }
 
-let syncIntervalTimer: any = null;
+let syncIntervalTimer: ReturnType<typeof setInterval> | null = null;
 
 export function registerAutoSync() {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") return () => {};
+
+  const handleOnline = () => {
+    syncOfflineQueue();
+    pullCloudUpdates();
+  };
+  const handleFocus = () => {
+    pullCloudUpdates();
+    syncOfflineQueue();
+  };
 
   // Initial pull and sync on load
   pullCloudUpdates();
   syncOfflineQueue();
 
   // Listen to window online event
-  window.addEventListener("online", () => {
-    syncOfflineQueue();
-    pullCloudUpdates();
-  });
-
-  window.addEventListener("focus", () => {
-    pullCloudUpdates();
-    syncOfflineQueue();
-  });
+  window.addEventListener("online", handleOnline);
+  window.addEventListener("focus", handleFocus);
 
   // Background multi-device sync polling interval every 15 seconds
   if (!syncIntervalTimer) {
@@ -133,4 +135,13 @@ export function registerAutoSync() {
       }
     }, 15000);
   }
+
+  return () => {
+    window.removeEventListener("online", handleOnline);
+    window.removeEventListener("focus", handleFocus);
+    if (syncIntervalTimer) {
+      clearInterval(syncIntervalTimer);
+      syncIntervalTimer = null;
+    }
+  };
 }
